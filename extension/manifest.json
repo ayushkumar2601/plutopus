@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "PLUTO Security Agent",
+  "version": "1.0.0",
+  "description": "Autonomous cyber defense agent with real-time threat detection",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "cookies",
+    "tabs",
+    "notifications",
+    "scripting",
+    "webNavigation",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://lokey-secure.vercel.app/*",
+    "https://ai-nms-security.vercel.app/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "exclude_matches": ["*://localhost/*", "*://127.0.0.1/*"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "PLUTO Security Agent"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html", "popup.css", "popup.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
