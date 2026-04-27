@@ -43,7 +43,7 @@ const colors = {
 console.log(`
 ${colors.cyan}╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║     🌱 AI-NMS Database Seeder                               ║
+║     🌱 PLUTO Database Seeder                                ║
 ║                                                              ║
 ║     Seeding database with demo traffic data                 ║
 ║                                                              ║

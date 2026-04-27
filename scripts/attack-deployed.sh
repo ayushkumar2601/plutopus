@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================
-# AI-NMS Attack Simulator for DEPLOYED SITE
+# PLUTO Attack Simulator for DEPLOYED SITE
 # Use this to test your live Vercel deployment
 # ============================================
 
@@ -17,7 +17,7 @@ NC='\033[0m'
 # ============================================
 # CHANGE THIS TO YOUR DEPLOYED URL
 # ============================================
-TARGET_URL="https://ai-nms-security.vercel.app"
+TARGET_URL="https://pluto-security.vercel.app"
 # Or use your actual deployed URL
 
 BASE_URL="$TARGET_URL"
@@ -25,7 +25,7 @@ BASE_URL="$TARGET_URL"
 echo -e "${RED}"
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║                                                              ║"
-echo "║     🤖 AI-NMS Attack Simulator - LIVE DEPLOYMENT TEST       ║"
+echo "║     🤖 PLUTO Attack Simulator - LIVE DEPLOYMENT TEST        ║"
 echo "║                                                              ║"
 echo "║     Testing your Vercel deployed security system            ║"
 echo "║                                                              ║"

@@ -1,5 +1,5 @@
 /**
- * AI-NMS Sandbox Browser Server
+ * PLUTO Sandbox Browser Server
  * Runs on port 4000 — separate from Next.js
  *
  * Architecture:

@@ -9,7 +9,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI-NMS // NETWORK MONITORING SYSTEM",
+  title: "PLUTO",
   description: "Agentic AI-powered network monitoring and threat detection platform",
 };
 

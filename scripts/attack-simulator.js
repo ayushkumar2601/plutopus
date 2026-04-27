@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ============================================
-// AI-NMS Real Attack Simulator
+// PLUTO Real Attack Simulator
 // Generates realistic attack traffic for demo
 // Usage: node scripts/attack-simulator.js
 // ============================================
@@ -115,7 +115,7 @@ async function runSimulation() {
   console.log(`
 ${colors.cyan}╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║     🎯 AI-NMS Attack Simulator                              ║
+║     🎯 PLUTO Attack Simulator                               ║
 ║                                                              ║
 ║     Generating realistic attack traffic...                  ║
 ║                                                              ║

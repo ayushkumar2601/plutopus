@@ -94,7 +94,7 @@ async function createSession(): Promise<{ ok: boolean; sessionId?: string; error
     params: {
       protocolVersion: '2024-11-05',
       capabilities:    { tools: {} },
-      clientInfo:      { name: 'AI-NMS', version: '10.0' },
+      clientInfo:      { name: 'PLUTO', version: '10.0' },
     },
   });
 

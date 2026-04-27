@@ -82,7 +82,7 @@ export default function SecurityWidget({ initialScore = 100, domain = 'current s
               <span className="text-sm">🛡️</span>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">AI-NMS Guardian</h3>
+              <h3 className="text-sm font-bold text-white">PLUTO Guardian</h3>
               <p className="text-xs text-gray-400">Real-time Security</p>
             </div>
           </div>

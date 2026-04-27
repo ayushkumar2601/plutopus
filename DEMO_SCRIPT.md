@@ -1,10 +1,10 @@
-# AI-NMS — Complete Judge Demo Script (Exact UI Steps)
+# PLUTO — Complete Judge Demo Script (Exact UI Steps)
 
 ---
 
 ## 30-Second Pitch (say this first)
 
-"AI-NMS is a full-stack agentic cybersecurity platform. It monitors live network traffic, scans websites in a sandboxed browser before you load them, and uses Groq's Llama 3.3 70B AI to classify threats in real time. Every AI action — blocking IPs, rate limiting, scanning sites — is governed by Civic's MCP Hub with hard guardrails and a full audit trail. The Chrome extension intercepts your browsing and feeds real traffic into the dashboard. Everything runs in-memory, zero database, zero setup."
+"PLUTO is a full-stack agentic cybersecurity platform. It monitors live network traffic, scans websites in a sandboxed browser before you load them, and uses Groq's Llama 3.3 70B AI to classify threats in real time. Every AI action — blocking IPs, rate limiting, scanning sites — is governed by Civic's MCP Hub with hard guardrails and a full audit trail. The Chrome extension intercepts your browsing and feeds real traffic into the dashboard. Everything runs in-memory, zero database, zero setup."
 
 ---
 

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     if (format === 'json') {
       return new NextResponse(JSON.stringify(report, null, 2), {
-        headers: { 'Content-Type': 'application/json', 'Content-Disposition': `attachment; filename="ai-nms-report-${Date.now()}.json"` },
+        headers: { 'Content-Type': 'application/json', 'Content-Disposition': `attachment; filename="pluto-report-${Date.now()}.json"` },
       });
     }
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       ...traffic.map(t => [new Date(t.timestamp).toISOString(), t.ip, t.port, t.protocol, t.requestCount, t.riskScore ?? 0, t.threatStatus ?? 'Normal', t.attackType ?? 'None']),
     ];
     return new NextResponse(csvRows.map(r => r.join(',')).join('\n'), {
-      headers: { 'Content-Type': 'text/csv', 'Content-Disposition': `attachment; filename="ai-nms-traffic-${Date.now()}.csv"` },
+      headers: { 'Content-Type': 'text/csv', 'Content-Disposition': `attachment; filename="pluto-traffic-${Date.now()}.csv"` },
     });
   } catch (err) {
     return NextResponse.json({ success: false, message: 'Export failed' }, { status: 500 });

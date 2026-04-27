@@ -72,7 +72,7 @@ export default function ThreatPopup({
             <div className="text-3xl animate-pulse">{config.icon}</div>
             <div>
               <h3 className="text-lg font-bold text-white">{config.title}</h3>
-              <p className="text-xs text-gray-300">Detected by AI-NMS Guardian</p>
+              <p className="text-xs text-gray-300">Detected by PLUTO Guardian</p>
             </div>
           </div>
           <button onClick={handleClose} className="text-gray-400 hover:text-white transition text-xl">

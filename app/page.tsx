@@ -175,10 +175,10 @@ export default function Home() {
     pushCivic('CIVIC> triggering live tool calls...');
     try {
       const calls = [
-        { tool: 'log_security_event', params: { event: 'dashboard_opened', source: 'AI-NMS', timestamp: new Date().toISOString() } },
-        { tool: 'retrieve_recent_threats', params: { limit: 5, source: 'AI-NMS' } },
-        { tool: 'scan_website', params: { domain: 'lokey-secure.vercel.app', source: 'AI-NMS' } },
-        { tool: 'log_security_event', params: { event: 'threat_scan_complete', source: 'AI-NMS', timestamp: new Date().toISOString() } },
+        { tool: 'log_security_event', params: { event: 'dashboard_opened', source: 'PLUTO', timestamp: new Date().toISOString() } },
+        { tool: 'retrieve_recent_threats', params: { limit: 5, source: 'PLUTO' } },
+        { tool: 'scan_website', params: { domain: 'lokey-secure.vercel.app', source: 'PLUTO' } },
+        { tool: 'log_security_event', params: { event: 'threat_scan_complete', source: 'PLUTO', timestamp: new Date().toISOString() } },
       ];
       for (const call of calls) {
         pushCivic(`CIVIC> calling: ${call.tool}...`);

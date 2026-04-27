@@ -193,7 +193,7 @@ export default function WarningPage() {
       }}>
         <div>
           <span style={{ fontSize: 13, fontWeight: 700, color, letterSpacing: '0.12em', textShadow: `0 0 10px ${color}` }}>
-            AI-NMS // SANDBOX INTERCEPTOR
+            PLUTO // SANDBOX INTERCEPTOR
           </span>
           <div style={{ fontSize: 10, color: '#374151', marginTop: 2 }}>
             {scanning ? '● SCANNING IN ISOLATED CONTEXT...' : result ? `● SCAN COMPLETE — ${result.sandboxVerdict.toUpperCase()}` : '● READY'}

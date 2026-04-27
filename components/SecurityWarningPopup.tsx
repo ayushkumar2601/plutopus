@@ -69,7 +69,7 @@ export default function SecurityWarningPopup({ data, onLeave, onProceed, onViewR
         <div style={{ padding: '12px 16px', background: '#0a0a0a', borderBottom: '1px solid #1f2937', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color, letterSpacing: '0.1em', textShadow: `0 0 8px ${color}` }}>
-              AI-NMS // SECURITY WARNING
+              PLUTO // SECURITY WARNING
             </div>
             <div style={{ fontSize: 10, color: '#374151', marginTop: 2 }}>{data.domain}</div>
           </div>
@@ -114,6 +114,18 @@ export default function SecurityWarningPopup({ data, onLeave, onProceed, onViewR
                 <span style={{ fontSize: 10.5, color: '#9ca3af', lineHeight: 1.4 }}>{t.text}</span>
               </div>
             ))}
+            
+            {/* Cookie Theft Warning */}
+            {data.threats.some(t => t.text.includes('COOKIE_THEFT_POSSIBLE') || t.text.includes('cookie(s) can be stolen')) && (
+              <div style={{ marginTop: 10, padding: '10px', background: '#ff3b3b15', border: '1px solid #ff3b3b' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#ff3b3b', marginBottom: 6 }}>
+                  ⚠️ COOKIE THEFT RISK
+                </div>
+                <div style={{ fontSize: 9, color: '#9ca3af', lineHeight: 1.4 }}>
+                  This site allows JavaScript to access cookies. Attackers can steal your session tokens and impersonate you.
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -243,7 +243,7 @@ async function executeAction(decision: AgentDecision): Promise<any> {
   }
   
   try {
-    const result = await tool(decision.params);
+    const result = await tool(decision.params as any);
     return {
       success: true,
       action: decision.action,

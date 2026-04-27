@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Theft Test Page</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff88;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #1f2937;
+            padding: 30px;
+            background: #050505;
+        }
+        h1 {
+            color: #00eaff;
+            border-bottom: 2px solid #00eaff;
+            padding-bottom: 10px;
+        }
+        .cookie-info {
+            background: #111827;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 3px solid #facc15;
+        }
+        .warning {
+            background: #ff3b3b15;
+            border: 1px solid #ff3b3b;
+            padding: 15px;
+            margin: 20px 0;
+            color: #ff3b3b;
+        }
+        code {
+            background: #1f2937;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #facc15;
+        }
+        button {
+            background: #00eaff;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00ff88;
+        }
+        #cookie-display {
+            background: #1f2937;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #00eaff;
+            word-break: break-all;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍪 Cookie Theft Test Page</h1>
+        
+        <p>This page demonstrates vulnerable cookies that can be stolen via JavaScript.</p>
+
+        <div class="warning">
+            <strong>⚠️ WARNING:</strong> This page intentionally sets insecure cookies for testing purposes.
+            In production, cookies should ALWAYS have the <code>httpOnly</code> and <code>secure</code> flags.
+        </div>
+
+        <h2>Set Test Cookies</h2>
+        <button onclick="setVulnerableCookies()">Set Vulnerable Cookies</button>
+        <button onclick="setSecureCookies()">Set Secure Cookies</button>
+        <button onclick="clearAllCookies()">Clear All Cookies</button>
+
+        <h2>Current Cookies (Accessible via JavaScript)</h2>
+        <div id="cookie-display">
+            <em>No cookies accessible via document.cookie</em>
+        </div>
+
+        <div class="cookie-info">
+            <h3>Cookie Details:</h3>
+            <ul id="cookie-list">
+                <li>Click "Set Vulnerable Cookies" to create test cookies</li>
+            </ul>
+        </div>
+
+        <h2>Simulate Cookie Theft</h2>
+        <button onclick="simulateTheft()">🚨 Simulate Cookie Theft Attack</button>
+        <div id="theft-result"></div>
+
+        <h2>How PLUTO Detects This:</h2>
+        <ol>
+            <li>Scans page in isolated Playwright browser</li>
+            <li>Collects cookies via <code>context.cookies()</code></li>
+            <li>Tests if <code>document.cookie</code> is accessible</li>
+            <li>Simulates theft by reading cookie values</li>
+            <li>Blocks site if cookies are stealable</li>
+        </ol>
+    </div>
+
+    <script>
+        function setVulnerableCookies() {
+            // Set cookies WITHOUT httpOnly flag (vulnerable)
+            document.cookie = "session_id=abc123def456; path=/; max-age=3600";
+            document.cookie = "user_token=xyz789uvw012; path=/; max-age=3600";
+            document.cookie = "auth_key=secret_key_12345; path=/; max-age=3600";
+            document.cookie = "user_prefs=theme:dark|lang:en; path=/; max-age=3600";
+            
+            updateCookieDisplay();
+            alert('✅ Vulnerable cookies set! These can be stolen via JavaScript.');
+        }
+
+        function setSecureCookies() {
+            // Note: httpOnly flag can only be set server-side
+            // This demonstrates the limitation
+            alert('⚠️ Secure cookies (with httpOnly flag) can only be set by the server, not via JavaScript.\n\nThis is why PLUTO checks for httpOnly flag - if missing, cookies are vulnerable!');
+        }
+
+        function clearAllCookies() {
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                const name = cookie.split("=")[0].trim();
+                document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+            updateCookieDisplay();
+            alert('🗑️ All cookies cleared!');
+        }
+
+        function updateCookieDisplay() {
+            const cookieDisplay = document.getElementById('cookie-display');
+            const cookieList = document.getElementById('cookie-list');
+            const cookies = document.cookie;
+
+            if (cookies) {
+                cookieDisplay.innerHTML = `<code>${cookies}</code>`;
+                
+                const cookieArray = cookies.split('; ');
+                let listHTML = '';
+                cookieArray.forEach(cookie => {
+                    const [name, value] = cookie.split('=');
+                    listHTML += `<li><strong>${name}</strong>: ${value} <span style="color: #ff3b3b;">(❌ STEALABLE)</span></li>`;
+                });
+                cookieList.innerHTML = listHTML;
+            } else {
+                cookieDisplay.innerHTML = '<em>No cookies accessible via document.cookie</em>';
+                cookieList.innerHTML = '<li>No cookies set</li>';
+            }
+        }
+
+        function simulateTheft() {
+            const cookies = document.cookie;
+            const theftResult = document.getElementById('theft-result');
+            
+            if (cookies) {
+                theftResult.innerHTML = `
+                    <div class="warning" style="margin-top: 20px;">
+                        <h3>🚨 COOKIE THEFT SUCCESSFUL!</h3>
+                        <p><strong>Stolen Data:</strong></p>
+                        <code>${cookies}</code>
+                        <p style="margin-top: 15px;">
+                            <strong>Attack Vector:</strong> An attacker could inject JavaScript (via XSS) to steal these cookies and send them to a malicious server.
+                        </p>
+                        <p>
+                            <strong>Impact:</strong> Session hijacking, account takeover, identity theft
+                        </p>
+                        <p>
+                            <strong>PLUTO's Response:</strong> ⛔ BLOCK this site immediately
+                        </p>
+                    </div>
+                `;
+            } else {
+                theftResult.innerHTML = `
+                    <div class="cookie-info" style="margin-top: 20px; border-left-color: #00ff88;">
+                        <h3>✅ NO COOKIES ACCESSIBLE</h3>
+                        <p>No cookies can be stolen via JavaScript. Either:</p>
+                        <ul>
+                            <li>No cookies are set</li>
+                            <li>All cookies have the <code>httpOnly</code> flag (secure)</li>
+                        </ul>
+                        <p><strong>PLUTO's Response:</strong> ✅ SAFE to proceed</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update display on page load
+        updateCookieDisplay();
+
+        // Auto-update every 2 seconds
+        setInterval(updateCookieDisplay, 2000);
+    </script>
+</body>
+</html>

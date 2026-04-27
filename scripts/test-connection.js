@@ -45,7 +45,7 @@ const colors = {
 console.log(`
 ${colors.cyan}╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║     🔌 AI-NMS Database Connection Tester                    ║
+║     🔌 PLUTO Database Connection Tester                     ║
 ║                                                              ║
 ║     Verifying MongoDB Atlas Connection                      ║
 ║                                                              ║

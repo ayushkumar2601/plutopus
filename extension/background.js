@@ -1,4 +1,4 @@
-// AI-NMS Security Guardian v10.0
+// PLUTO Security Guardian v10.0
 // REAL security checks only — no false positives
 
 const API_BASE = 'https://lokey-secure.vercel.app';
@@ -390,7 +390,7 @@ function showInPagePopup(tabId, data) {
   <div style="width:420px;max-width:92vw;max-height:85vh;background:#050505;border:1px solid #1f2937;border-top:2px solid ${color};display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,0.8)">
     <div style="padding:12px 16px;background:#0a0a0a;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between">
       <div>
-        <span style="font-size:12px;font-weight:700;color:${color};letter-spacing:0.1em;text-shadow:0 0 8px ${color}">AI-NMS // SECURITY ALERT</span>
+        <span style="font-size:12px;font-weight:700;color:${color};letter-spacing:0.1em;text-shadow:0 0 8px ${color}">PLUTO // SECURITY ALERT</span>
         <div style="font-size:10px;color:#374151;margin-top:2px">${esc(data.domain)}</div>
       </div>
       <button id="ainms-x" style="background:none;border:1px solid #1f2937;color:#374151;width:24px;height:24px;cursor:pointer;font-size:13px;font-family:monospace">×</button>
@@ -588,4 +588,4 @@ try {
   self.addEventListener('activate', () => { try { registerListeners(); } catch {} });
 }
 
-console.log('AI-NMS v10.0 — real checks only');
+console.log('PLUTO v10.0 — real checks only');

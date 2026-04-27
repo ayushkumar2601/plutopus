@@ -8,9 +8,13 @@ interface PlutoThinkingStreamProps {
   className?: string;
 }
 
-interface QueuedStep extends AgentStep {
+interface QueuedStep {
   id: string;
   rendered: boolean;
+  type: AgentStep['type'];
+  message: string;
+  timestamp: string;
+  data?: any;
 }
 
 // Cinematic step delays (frontend only)

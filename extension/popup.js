@@ -1,4 +1,4 @@
-// AI-NMS Popup v10.0 — terminal style
+// PLUTO Popup v10.0 — terminal style
 
 const CIRC = 2 * Math.PI * 46; // r=46
 

@@ -126,7 +126,7 @@ program
         console.log(chalk.red('✗ Agent error:', response.data.message));
       }
     } catch (error) {
-      console.log(chalk.red('✗ Failed to run agent:', error.message));
+      console.log(chalk.red('✗ Failed to run agent:', error instanceof Error ? error.message : String(error)));
     }
   });
 
@@ -148,7 +148,7 @@ program
         console.log(chalk.red('✗ PLUTO error:', response.data.message));
       }
     } catch (error) {
-      console.log(chalk.red('✗ Failed to ask PLUTO:', error.message));
+      console.log(chalk.red('✗ Failed to ask PLUTO:', error instanceof Error ? error.message : String(error)));
     }
   });
 

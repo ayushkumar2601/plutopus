@@ -19,6 +19,25 @@ export interface SandboxResult {
   recommendations: string[];
   sandboxVerdict: 'safe' | 'warning' | 'block';
   timestamp: string;
+  // Cookie theft detection
+  cookieIssues?: CookieIssue[];
+  jsCookies?: string;
+  cookieStealable?: boolean;
+  theftSimulation?: TheftSimulation;
+}
+
+export interface CookieIssue {
+  name: string;
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: string;
+  risk: string | null;
+}
+
+export interface TheftSimulation {
+  canAccess: string;
+  length: number;
+  accessible: boolean;
 }
 
 export interface SandboxCookie {
@@ -126,13 +145,15 @@ export async function scanWebsiteInSandbox(url: string): Promise<SandboxResult> 
     const { chromium } = await import('playwright');
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (compatible; AI-NMS-Scanner/1.0)',
+      userAgent: 'Mozilla/5.0 (compatible; PLUTO-Scanner/1.0)',
       ignoreHTTPSErrors: true,
     });
 
     const page = await context.newPage();
     const collectedScripts: string[] = [];
     const mixedContentUrls: string[] = [];
+    const setCookieHeaders: string[] = [];
+    let cookieSettingAttempts = 0;
 
     // Intercept requests to collect scripts and mixed content
     page.on('request', req => {
@@ -141,6 +162,18 @@ export async function scanWebsiteInSandbox(url: string): Promise<SandboxResult> 
       if (url.startsWith('https://') && reqUrl.startsWith('http://')) {
         mixedContentUrls.push(reqUrl);
       }
+    });
+
+    // Intercept responses to detect Set-Cookie headers
+    page.on('response', async (response) => {
+      try {
+        const headers = await response.allHeaders();
+        const setCookie = headers['set-cookie'];
+        if (setCookie) {
+          setCookieHeaders.push(setCookie);
+          cookieSettingAttempts++;
+        }
+      } catch {}
     });
 
     try {
@@ -157,6 +190,71 @@ export async function scanWebsiteInSandbox(url: string): Promise<SandboxResult> 
       httpOnly: c.httpOnly,
       sameSite: c.sameSite || 'None',
     }));
+
+    // ── PART 1: Cookie Security Analysis ──
+    const cookieIssues: CookieIssue[] = cookies.map(c => ({
+      name: c.name,
+      httpOnly: c.httpOnly,
+      secure: c.secure,
+      sameSite: c.sameSite,
+      risk: (!c.httpOnly ? "JS_ACCESSIBLE" : null) ||
+            (!c.secure ? "NOT_SECURE" : null)
+    }));
+
+    // ── PART 2: Detect JS Cookie Access (Critical) ──
+    let jsCookies = '';
+    let cookieStealable = false;
+    let canSetCookies = false;
+    
+    try {
+      // Test if website can set cookies via JavaScript
+      const cookieTest = await page.evaluate(() => {
+        try {
+          // Try to set a test cookie
+          document.cookie = "pluto_test=1; path=/";
+          // Try to read it back
+          const testResult = document.cookie;
+          // Clean up
+          document.cookie = "pluto_test=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+          return {
+            canSet: testResult.includes('pluto_test'),
+            existingCookies: document.cookie
+          };
+        } catch {
+          return { canSet: false, existingCookies: '' };
+        }
+      });
+      
+      canSetCookies = cookieTest.canSet;
+      jsCookies = cookieTest.existingCookies;
+      
+      // Cookie is stealable if:
+      // 1. Cookies exist and are accessible, OR
+      // 2. Website can set cookies via JavaScript (no httpOnly protection)
+      cookieStealable = !!(jsCookies && jsCookies.length > 0) || canSetCookies;
+    } catch {}
+
+    // ── PART 3: Simulate Cookie Theft Attack ──
+    let theftSimulation: TheftSimulation = { canAccess: '', length: 0, accessible: false };
+    try {
+      theftSimulation = await page.evaluate(() => {
+        try {
+          const cookieData = document.cookie;
+          return {
+            canAccess: cookieData,
+            length: cookieData.length,
+            accessible: cookieData.length > 0 || true // Always accessible if JS can run
+          };
+        } catch {
+          return { canAccess: '', length: 0, accessible: false };
+        }
+      });
+      
+      // If website allows JS cookie setting, mark as accessible
+      if (canSetCookies) {
+        theftSimulation.accessible = true;
+      }
+    } catch {}
 
     // ── Collect inline script patterns (same logic as extension) ──
     const suspiciousPatterns: string[] = [];
@@ -316,6 +414,49 @@ export async function scanWebsiteInSandbox(url: string): Promise<SandboxResult> 
       threats.push({ level: 'medium', text: 'eval() found in inline script — potential code injection vector' });
     }
 
+    // 10. COOKIE THEFT DETECTION (Critical)
+    if (cookieStealable && theftSimulation.accessible) {
+      risk += 40;
+      
+      if (jsCookies && jsCookies.length > 0) {
+        // Existing cookies are stealable
+        threats.push({ 
+          level: 'critical', 
+          text: `COOKIE THEFT POSSIBLE — ${theftSimulation.length} characters accessible via JavaScript (document.cookie)` 
+        });
+        
+        // List specific stealable cookies
+        const stealableCookies = cookieIssues.filter(c => c.risk === 'JS_ACCESSIBLE');
+        if (stealableCookies.length > 0) {
+          threats.push({ 
+            level: 'critical', 
+            text: `${stealableCookies.length} cookie(s) can be stolen: ${stealableCookies.map(c => c.name).join(', ')}` 
+          });
+        }
+      } else if (canSetCookies) {
+        // Website can set cookies via JavaScript (vulnerable to theft)
+        threats.push({ 
+          level: 'critical', 
+          text: `COOKIE THEFT RISK — Website can set cookies via JavaScript without httpOnly protection` 
+        });
+        threats.push({ 
+          level: 'critical', 
+          text: `Any cookies set by this site will be accessible to attackers via XSS attacks` 
+        });
+      }
+      
+      // Check Set-Cookie headers for httpOnly flag
+      if (setCookieHeaders.length > 0) {
+        const vulnerableHeaders = setCookieHeaders.filter(h => !h.toLowerCase().includes('httponly'));
+        if (vulnerableHeaders.length > 0) {
+          threats.push({ 
+            level: 'high', 
+            text: `${vulnerableHeaders.length} Set-Cookie header(s) missing httpOnly flag — cookies will be stealable` 
+          });
+        }
+      }
+    }
+
     risk = Math.min(100, Math.max(0, risk));
 
     // ── Groq AI enrichment (same as extension) ──
@@ -388,6 +529,11 @@ export async function scanWebsiteInSandbox(url: string): Promise<SandboxResult> 
       recommendations,
       sandboxVerdict: verdictFromRisk(finalRisk),
       timestamp: new Date().toISOString(),
+      // Cookie theft detection results
+      cookieIssues,
+      jsCookies,
+      cookieStealable,
+      theftSimulation,
     };
 
   } catch {

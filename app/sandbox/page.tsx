@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import CookieTheftPopup, { CookieTheftData } from '@/components/CookieTheftPopup';
 
 // ── Types ──────────────────────────────────────────────
 interface SandboxThreat {
@@ -310,6 +311,7 @@ export default function SandboxPage() {
   const [blocked, setBlocked]   = useState(false);
   const [showBrowser, setShowBrowser] = useState(false);
   const [browserUrl, setBrowserUrl]   = useState('');
+  const [cookieTheftPopup, setCookieTheftPopup] = useState<CookieTheftData | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
   const pushLog = (line: string) => {
@@ -372,6 +374,31 @@ export default function SandboxPage() {
         pushLog('SANDBOX> risk_score: ' + r.riskScore);
         pushLog('SANDBOX> verdict: ' + r.sandboxVerdict.toUpperCase());
 
+        // Check for cookie theft and show popup
+        const cookieStealable = (r as any).cookieStealable;
+        const theftSimulation = (r as any).theftSimulation;
+        const cookieIssues = (r as any).cookieIssues;
+        const jsCookies = (r as any).jsCookies;
+        
+        if (cookieStealable && theftSimulation?.accessible) {
+          pushLog('SANDBOX> ⚠️ COOKIE THEFT RISK DETECTED — showing alert...');
+          
+          const stealableCookies = cookieIssues
+            ?.filter((c: any) => c.risk === 'JS_ACCESSIBLE')
+            .map((c: any) => c.name) || [];
+          
+          // Show popup even if no cookies exist yet, but site can set them
+          if (stealableCookies.length > 0 || !jsCookies || jsCookies.length === 0) {
+            setCookieTheftPopup({
+              domain: r.domain,
+              url: fullUrl,
+              stealableCookies,
+              cookieData: jsCookies || '',
+              cookieLength: theftSimulation.length || 0,
+            });
+          }
+        }
+
         if (r.sandboxVerdict === 'block') {
           pushLog('SANDBOX> NAVIGATION BLOCKED — site is unsafe');
           setBlocked(true);
@@ -402,7 +429,7 @@ export default function SandboxPage() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 20, fontWeight: 700, color: '#00eaff', letterSpacing: '0.12em', textShadow: '0 0 12px #00eaff' }}>
-          AI-NMS // SANDBOX SCANNER
+          PLUTO // SANDBOX SCANNER
         </div>
         <div style={{ fontSize: 11, color: '#374151', marginTop: 4 }}>
           Analyze and interact with any website in an isolated Playwright browser
@@ -492,7 +519,7 @@ export default function SandboxPage() {
               </div>
               {blocked && (
                 <div style={{ marginTop: 12, padding: '10px 14px', background: '#ff3b3b15', border: '1px solid #ff3b3b', fontSize: 11, color: '#ff3b3b', lineHeight: 1.6 }}>
-                  NAVIGATION BLOCKED — AI-NMS sandbox detected critical threats. Your real browser was never exposed.
+                  NAVIGATION BLOCKED — PLUTO sandbox detected critical threats. Your real browser was never exposed.
                 </div>
               )}
               {/* Open in interactive browser button */}
@@ -519,6 +546,45 @@ export default function SandboxPage() {
               </div>
             </div>
 
+            {/* Cookie Security Analysis */}
+            {(result as any).cookieStealable && (
+              <div style={{ background: '#0a0a0a', border: '1px solid #ff3b3b', padding: '12px 14px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#ff3b3b', letterSpacing: '0.1em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>⚠️ COOKIE THEFT RISK DETECTED</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#9ca3af', lineHeight: 1.5, marginBottom: 10 }}>
+                  This site allows JavaScript to access cookies. Attackers can steal session tokens.
+                </div>
+                
+                {(result as any).cookieIssues && (result as any).cookieIssues.filter((c: any) => c.risk === 'JS_ACCESSIBLE').length > 0 && (
+                  <div style={{ background: '#111827', padding: '8px 10px', marginBottom: 8, borderLeft: '2px solid #ff3b3b' }}>
+                    <div style={{ fontSize: 9, color: '#374151', marginBottom: 4 }}>// STEALABLE_COOKIES</div>
+                    {(result as any).cookieIssues.filter((c: any) => c.risk === 'JS_ACCESSIBLE').slice(0, 5).map((cookie: any, i: number) => (
+                      <div key={i} style={{ fontSize: 9, color: '#ff3b3b', fontFamily: 'monospace', padding: '2px 0' }}>
+                        • {cookie.name} (httpOnly: false)
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {(result as any).theftSimulation && (result as any).theftSimulation.accessible && (
+                  <div style={{ background: '#111827', padding: '8px 10px', marginBottom: 8, borderLeft: '2px solid #facc15' }}>
+                    <div style={{ fontSize: 9, color: '#374151', marginBottom: 4 }}>// THEFT_SIMULATION</div>
+                    <div style={{ fontSize: 9, color: '#9ca3af', marginBottom: 4 }}>
+                      document.cookie → "{(result as any).jsCookies?.substring(0, 60)}{(result as any).jsCookies && (result as any).jsCookies.length > 60 ? '...' : ''}"
+                    </div>
+                    <div style={{ fontSize: 9, color: '#facc15' }}>
+                      Status: ❌ STEALABLE ({(result as any).theftSimulation.length} characters accessible)
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ fontSize: 9, color: '#ff3b3b', fontWeight: 700, letterSpacing: '0.05em' }}>
+                  ⛔ RECOMMENDATION: Leave Site Immediately
+                </div>
+              </div>
+            )}
+
             {result.recommendations.length > 0 && (
               <div style={{ background: '#0a0a0a', border: '1px solid #1f2937', padding: '10px 14px' }}>
                 <div style={{ fontSize: 9, color: '#374151', letterSpacing: '0.08em', marginBottom: 6 }}>// AI_RECOMMENDATIONS</div>
@@ -536,6 +602,26 @@ export default function SandboxPage() {
       {/* SECTION 3 — Interactive Browser */}
       {showBrowser && browserUrl && (
         <InteractiveBrowser initialUrl={browserUrl} />
+      )}
+
+      {/* Cookie Theft Popup */}
+      {cookieTheftPopup && (
+        <CookieTheftPopup
+          data={cookieTheftPopup}
+          onBlock={() => {
+            setCookieTheftPopup(null);
+            setBlocked(true);
+            pushLog('SANDBOX> Site blocked due to cookie theft vulnerability');
+          }}
+          onViewReport={() => {
+            setCookieTheftPopup(null);
+            // Scroll to results
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onDismiss={() => {
+            setCookieTheftPopup(null);
+          }}
+        />
       )}
 
       <style>{`
