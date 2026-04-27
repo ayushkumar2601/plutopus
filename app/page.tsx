@@ -9,6 +9,7 @@ import AttackSimulator from '../components/AttackSimulator';
 import PlutoThinkingStream from '../components/PlutoThinkingStream';
 import PlutoDecisionCard from '../components/PlutoDecisionCard';
 import PlutoMemoryInsight from '../components/PlutoMemoryInsight';
+import LiveAttackNotificationManager from '../components/LiveAttackNotificationManager';
 import { playAlert, playScan, playBlock, preloadSounds } from '../lib/sounds';
 import { AgentOutput } from '../lib/agent/sentinelAgent';
 
@@ -357,6 +358,9 @@ export default function Home() {
 
   return (
     <div className="t-shell">
+
+      {/* Live Attack Notifications */}
+      <LiveAttackNotificationManager maxNotifications={3} />
 
       {/* Security Warning Popup */}
       {securityWarning && (

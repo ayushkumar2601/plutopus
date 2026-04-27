@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { triggerAttackNotification } from './LiveAttackNotificationManager';
 
 type AttackType = 'ddos' | 'bruteforce' | 'portscan';
 
@@ -81,6 +82,30 @@ export default function AttackSimulator() {
         };
         setResult(r);
         setHistory(prev => [r, ...prev].slice(0, 5));
+        
+        // Trigger live notifications for high-risk attacks
+        if (data.entries && data.entries.length > 0) {
+          // Show notification for the highest risk entry
+          const highestRisk = data.entries.reduce((max: any, entry: any) => 
+            entry.riskScore > max.riskScore ? entry : max
+          , data.entries[0]);
+          
+          if (highestRisk.riskScore >= 35) {
+            const action = highestRisk.riskScore >= 80 ? 'BLOCKED' :
+                          highestRisk.riskScore >= 60 ? 'RATE_LIMITED' :
+                          highestRisk.riskScore >= 35 ? 'MONITORED' : 'ALLOWED';
+            
+            triggerAttackNotification({
+              attackType: highestRisk.attackType || data.attack.toUpperCase(),
+              ip: highestRisk.ip,
+              port: highestRisk.port,
+              riskScore: highestRisk.riskScore,
+              action,
+              reason: `${data.attack.toUpperCase()} attack detected - ${highestRisk.requestCount} requests`,
+              requestCount: highestRisk.requestCount,
+            });
+          }
+        }
       } else {
         setError(data.error ?? 'Simulation failed');
       }
